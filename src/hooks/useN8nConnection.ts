@@ -1,8 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
-
-const CREDENTIALS_KEY = '@n8n_credentials';
+import { useN8n } from '@/src/context/N8nContext';
 
 export interface N8nCredentials {
   instanceUrl: string;
@@ -18,6 +16,8 @@ export interface ConnectionState {
 }
 
 export function useN8nConnection() {
+  const { setConfig, client, isLoading: contextLoading, isConnected } = useN8n();
+  
   const [state, setState] = useState<ConnectionState>({
     isConnected: false,
     isLoading: true,
@@ -25,32 +25,6 @@ export function useN8nConnection() {
     error: null,
     credentials: null,
   });
-
-  useEffect(() => {
-    loadCredentials();
-  }, []);
-
-  const loadCredentials = useCallback(async () => {
-    try {
-      const stored = await AsyncStorage.getItem(CREDENTIALS_KEY);
-      if (stored) {
-        const credentials: N8nCredentials = JSON.parse(stored);
-        setState(prev => ({
-          ...prev,
-          credentials,
-          isLoading: false,
-        }));
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
-      }
-    } catch {
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to load saved credentials',
-      }));
-    }
-  }, []);
 
   const testConnection = useCallback(async (credentials: N8nCredentials): Promise<boolean> => {
     setState(prev => ({ ...prev, isTesting: true, error: null }));
@@ -68,7 +42,7 @@ export function useN8nConnection() {
       const isSuccess = response.status === 200;
       
       if (isSuccess) {
-        await AsyncStorage.setItem(CREDENTIALS_KEY, JSON.stringify(credentials));
+        await setConfig(credentials.apiKey, normalizedUrl);
         setState(prev => ({
           ...prev,
           isTesting: false,
@@ -105,25 +79,7 @@ export function useN8nConnection() {
       
       return false;
     }
-  }, []);
-
-  const disconnect = useCallback(async () => {
-    try {
-      await AsyncStorage.removeItem(CREDENTIALS_KEY);
-      setState({
-        isConnected: false,
-        isLoading: false,
-        isTesting: false,
-        error: null,
-        credentials: null,
-      });
-    } catch {
-      setState(prev => ({
-        ...prev,
-        error: 'Failed to disconnect',
-      }));
-    }
-  }, []);
+  }, [setConfig]);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
@@ -131,9 +87,10 @@ export function useN8nConnection() {
 
   return {
     ...state,
+    isTesting: state.isTesting,
+    isLoading: contextLoading,
+    isConnected: isConnected === true,
     testConnection,
-    disconnect,
     clearError,
-    loadCredentials,
   };
 }

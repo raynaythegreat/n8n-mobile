@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useN8n } from '@/src/context/N8nContext';
 import { useRouter } from 'expo-router';
@@ -7,12 +7,29 @@ import WorkflowsScreen from '@/src/screens/WorkflowsScreen';
 
 export default function WorkflowsTab() {
   const theme = useTheme();
-  const { isConnected } = useN8n();
+  const { isConnected, isLoading, client } = useN8n();
   const router = useRouter();
 
-  if (!isConnected) {
-    router.replace('/connection');
-    return null;
+  useEffect(() => {
+    if (!isLoading && !client) {
+      router.replace('/connection');
+    }
+  }, [isLoading, client, router]);
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color="#ff6d5a" />
+      </View>
+    );
+  }
+
+  if (!client) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color="#ff6d5a" />
+      </View>
+    );
   }
 
   return (
@@ -25,5 +42,9 @@ export default function WorkflowsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

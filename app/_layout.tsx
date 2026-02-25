@@ -1,12 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
-import { useColorScheme } from '@/components/useColorScheme';
 import { N8nProvider } from '@/src/context/N8nContext';
 import { ThemeProvider, useTheme } from '@/src/context/ThemeContext';
 import { lightTheme, darkTheme } from '@/src/theme';
@@ -34,7 +33,6 @@ function PaperThemeWrapper({ children }: { children: React.ReactNode }) {
 
 function NavigationThemeWrapper({ children }: { children: React.ReactNode }) {
   const { isDark } = useTheme();
-  
   const navigationTheme = isDark ? DarkTheme : DefaultTheme;
   
   return (
@@ -42,20 +40,6 @@ function NavigationThemeWrapper({ children }: { children: React.ReactNode }) {
       {children}
     </NavigationThemeProvider>
   );
-}
-
-function AuthGuard({ children }: { children: React.ReactNode }) {
-  const segments = useSegments();
-  const router = useRouter();
-  
-  useEffect(() => {
-    const inAuthGroup = segments[0] === 'connection';
-    
-    if (!inAuthGroup) {
-    }
-  }, [segments]);
-
-  return <>{children}</>;
 }
 
 export default function RootLayout() {
@@ -83,9 +67,7 @@ export default function RootLayout() {
       <ThemeProvider>
         <PaperThemeWrapper>
           <NavigationThemeWrapper>
-            <AuthGuard>
-              <RootLayoutNav />
-            </AuthGuard>
+            <RootLayoutNav />
           </NavigationThemeWrapper>
         </PaperThemeWrapper>
       </ThemeProvider>
