@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { ConnectionScreen } from '@/src/screens/ConnectionScreen';
+import { SetupWizard } from '@/src/screens/SetupWizard';
 import { useN8n } from '@/src/context/N8nContext';
 
 export default function ConnectionRoute() {
@@ -13,9 +13,9 @@ export default function ConnectionRoute() {
     }
   }, [isConnected, isLoading, router]);
 
-  const handleConnectionSuccess = () => {
+  const handleComplete = () => {
     router.replace('/(tabs)');
   };
 
-  return <ConnectionScreen onConnectionSuccess={handleConnectionSuccess} />;
+  return <SetupWizard onComplete={handleComplete} />;
 }
