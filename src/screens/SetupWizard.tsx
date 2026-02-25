@@ -32,7 +32,7 @@ export function SetupWizard({ onComplete }: SetupWizardProps) {
   const { testConnection, isTesting, error, clearError } = useN8nConnection();
   
   const [step, setStep] = useState<WizardStep>('welcome');
-  const [instanceUrl, setInstanceUrl] = useState('');
+  const [instanceUrl, setInstanceUrl] = useState('http://10.0.0.184:5678');
   const [apiKey, setApiKey] = useState('');
   const [urlError, setUrlError] = useState<string | null>(null);
   const [fadeAnim] = useState(new Animated.Value(1));
